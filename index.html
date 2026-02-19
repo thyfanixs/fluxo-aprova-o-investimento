@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Institucional | Automação</title>
+  <style>
+    /* Cores Customizáveis da Empresa */
+    :root { 
+      --primary: #FF6600; 
+      --primary-dark: #CC5200; 
+      --secondary: #333333; 
+      --bg: #f4f4f4;
+      --error: #e74c3c; 
+    }
+    body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { background: white; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 1100px; border-top: 5px solid var(--primary); margin-bottom: 20px; }
+    .logo-empresa { display: block; max-height: 50px; margin-bottom: 15px; }
+    h2 { color: var(--secondary); margin-top: 0; text-transform: uppercase; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: span 2; }
+    .hidden { display: none !important; }
+    label { display: block; margin-bottom: 0.5rem; color: #555; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.9rem; transition: 0.3s; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 4px; background-color: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
+    button:hover { background-color: var(--primary-dark); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    .btn-secondary { background-color: var(--secondary); }
+    .btn-outline { background: transparent; border: 1px solid #ccc; color: #666; margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.8rem; }
+    th { background: #f8f8f8; padding: 10px; text-align: left; color: #333; border-bottom: 2px solid var(--primary); }
+    td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+    .btn-remove { background: var(--error); padding: 5px 10px; font-size: 0.7rem; width: auto; margin: 0; }
+    .total-box { text-align: right; font-size: 1.4rem; font-weight: bold; margin-top: 20px; color: var(--primary); }
+    #modalFinalizar { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="loginBox" style="max-width: 400px; margin-top: 80px; text-align: center;">
+    <img src="https://via.placeholder.com/200x60/FF6600/FFFFFF?text=LOGO+AQUI" alt="Logo Empresa" class="logo-empresa" style="margin: 0 auto 20px auto;">
+    <h2 style="text-align: center; border: none;">Acesso ao Sistema</h2>
+    <div style="text-align: left;">
+      <label>E-mail Corporativo</label><input type="email" id="userEmail">
+      <label style="margin-top:15px">Senha</label><input type="password" id="userPass">
+    </div>
+    <button onclick="login()">ACESSAR SISTEMA</button>
+    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee;">
+      <a href="#" target="_blank" style="text-decoration: none; color: #555; font-size: 0.8rem; display: block;">
+        <span style="font-size: 1.2rem;">📘</span><br>
+        <strong>Dúvidas no Processo?</strong><br>
+        <span style="color: var(--primary); text-decoration: underline;">Acessar o Manual de Procedimentos</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="container hidden" id="formBox">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <img src="https://via.placeholder.com/150x40/FF6600/FFFFFF?text=LOGO" alt="Logo Empresa" class="logo-empresa">
+      <button onclick="logout()" style="width:auto; background:none; color:#999; margin:0; padding:5px;">Sair</button>
+    </div>
+    <h2>Nova Solicitação de Investimento</h2>
+    <div id="userInfo" style="font-size:0.8rem; color:#888; margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;"></div>
+    
+    <div class="grid">
+      <div><label>Data do Documento</label><input type="date" id="dataDoc"></div>
+      <div><label>Tipo Geral</label>
+        <select id="tipoItem">
+          <option value="Industrial">Industrial</option>
+          <option value="Administrativo">Administrativo</option>
+        </select>
+      </div>
+      <div><label>Estabelecimento</label><input type="text" id="estab"></div>
+      <div><label>Centro de Custo</label><input type="text" id="ccusto"></div>
+      <div><label>Unidade de Negócio</label><input type="text" id="uneg"></div>
+      <div><label>Setor Solicitante</label><input type="text" id="setor"></div>
+      <div class="full-width"><label>Descrição Resumida</label><textarea id="resumo" rows="2"></textarea></div>
+    </div>
+
+    <h3 style="margin-top:30px; color:#333; border-bottom:1px solid #ddd; padding-bottom:5px;">Detalhes da Aquisição</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%">Detalhe</th>
+          <th style="width: 30%">Conta Contábil</th>
+          <th style="width: 20%">Classificação</th>
+          <th style="width: 8%">Qtd</th>
+          <th style="width: 10%">V. Unit</th>
+          <th style="width: 10%">Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="corpoTabela"></tbody>
+    </table>
+    <button type="button" class="btn-outline" onclick="addLinha()" style="width:auto; margin-top:10px;">+ Adicionar Item</button>
+    <div class="total-box">Total Geral: R$ <span id="totalGeral">0,00</span></div>
+
+    <div class="grid" style="margin-top:30px; background:#f9f9f9; padding:20px; border-radius:4px;">
+      <div><label>Fornecedor</label><input type="text" id="fornecedor"></div>
+      <div><label>Orçado?</label>
+        <select id="orcado" onchange="document.getElementById('divOrcado').classList.toggle('hidden', this.value === 'N')">
+          <option value="N">Não</option><option value="S">Sim</option>
+        </select>
+      </div>
+      <div id="divOrcado" class="hidden"><label>Valor Orçado</label><input type="number" id="vOrcado"></div>
+      <div><label>Forma de Pagamento</label><input type="text" id="fPagamento"></div>
+      <div class="full-width"><label>Sistema ERP (Usuário)</label><input type="text" id="uEMS"></div>
+    </div>
+
+    <button id="btnEnviar" onclick="enviarAI()" style="margin-top:30px; height: 50px; font-size: 1.1rem;">SUBMETER PARA APROVAÇÃO</button>
+  </div>
+
+  <div class="container hidden" id="successBox" style="text-align: center; max-width: 500px; margin-top: 50px;">
+    <h2 style="color: var(--primary); border: none; font-size: 1.8rem;">✓ Sucesso!</h2>
+    <p style="font-size: 1.1rem; color: #555;">Solicitação registrada no banco de dados.</p>
+    <button onclick="location.reload()" class="btn-secondary" style="margin-top:20px;">Nova Solicitação</button>
+  </div>
+
+  <div class="container hidden" id="controlBox">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="border:none; margin:0; padding:0;">Dashboard Técnico</h2>
+      <button onclick="logout()" style="width:auto; background:#ccc; color:#333; padding:5px 15px;">Sair</button>
+    </div>
+    <button onclick="carregarAIs()" class="btn-secondary" style="width:auto; margin:15px 0; padding: 10px 20px;">🔄 Atualizar Lista</button>
+    <div style="overflow-x:auto;">
+      <table id="tabelaControle">
+        <thead><tr><th>Data</th><th>Solicitante</th><th>Projeto</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead>
+        <tbody id="listaAIs"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="modalFinalizar">
+    <div class="container" style="max-width: 400px; border-top: 5px solid var(--primary);">
+      <h3>Finalizar Processo Oficial</h3>
+      <input type="hidden" id="fIdAI">
+      <label>Número Gerado</label><input type="text" id="fNumAI">
+      <label style="margin-top:10px">Ano</label><input type="number" id="fAno" value="2026">
+      <label style="margin-top:10px">ID do ERP</label><input type="text" id="fProjID">
+      <button onclick="confirmarFinalizacao()" style="margin-top:20px;">GERAR PDF E FINALIZAR</button>
+      <button onclick="fecharModal()" style="background:#ccc; color:#333; margin-top:10px">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const email = document.getElementById('userEmail').value;
+      const pass = document.getElementById('userPass').value;
+      if(!email || !pass) return alert("Preencha e-mail e senha");
+      google.script.run.withSuccessHandler(user => {
+        if (user) {
+          sessionStorage.setItem('activeUser', JSON.stringify(user));
+          document.getElementById('loginBox').classList.add('hidden');
+          if (user.cargo === "Controladoria") {
+            document.getElementById('controlBox').classList.remove('hidden');
+            carregarAIs();
+          } else {
+            document.getElementById('formBox').classList.remove('hidden');
+            document.getElementById('userInfo').innerText = "Logado como: " + user.nome;
+            if(document.getElementById('corpoTabela').children.length === 0) addLinha();
+          }
+        } else { alert("Credenciais Inválidas."); }
+      }).verificarCredenciais(email, pass);
+    }
+
+    function addLinha() {
+      const tbody = document.getElementById('corpoTabela');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" class="det" placeholder="Ex: Equipamento X..."></td>
+        <td>
+          <select class="itm">
+            <option value="1.090.0001 - Ativo imobilizado">1.090.0001 - Imobilizado</option>
+            <option value="1.090.0002 - Imobilizado administrativo">1.090.0002 - Administrativo</option>
+            <option value="1.090.0003 - Ativo intangível">1.090.0003 - Intangível</option>
+          </select>
+        </td>
+        <td><input type="text" class="cls" placeholder="Ex: Informática"></td>
+        <td><input type="number" class="qtd" value="1" oninput="calc(this)"></td>
+        <td><input type="number" class="vunit" value="0" oninput="calc(this)"></td>
+        <td class="lin-total">0.00</td>
+        <td><button class="btn-remove" onclick="this.parentElement.parentElement.remove(); totalizar();">X</button></td>`;
+      tbody.appendChild(tr);
+    }
+
+    function calc(el) {
+      const tr = el.parentElement.parentElement;
+      const q = tr.querySelector('.qtd').value || 0;
+      const v = tr.querySelector('.vunit').value || 0;
+      tr.querySelector('.lin-total').innerText = (q * v).toFixed(2);
+      totalizar();
+    }
+
+    function totalizar() {
+      let t = 0;
+      document.querySelectorAll('.lin-total').forEach(td => t += parseFloat(td.innerText));
+      document.getElementById('totalGeral').innerText = t.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    }
+
+    function enviarAI() {
+      const btn = document.getElementById('btnEnviar');
+      const user = JSON.parse(sessionStorage.getItem('activeUser'));
+      btn.disabled = true; btn.innerText = "⏳ PROCESSANDO...";
+
+      const itens = [];
+      document.querySelectorAll('#corpoTabela tr').forEach(tr => {
+        itens.push({
+          detalhe: tr.querySelector('.det').value, item: tr.querySelector('.itm').value, classif: tr.querySelector('.cls').value,
+          qtd: tr.querySelector('.qtd').value, vunit: tr.querySelector('.vunit').value, total: tr.querySelector('.lin-total').innerText
+        });
+      });
+
+      const dados = {
+        solicitante: user.nome, emailSolicitante: user.email, diretorNegocio: user.diretor,
+        dataDocumento: document.getElementById('dataDoc').value, tipoItem: document.getElementById('tipoItem').value,
+        estabelecimento: document.getElementById('estab').value, centroCusto: document.getElementById('ccusto').value,
+        unidadeNegocio: document.getElementById('uneg').value, setorSolicitante: document.getElementById('setor').value,
+        resumoProjeto: document.getElementById('resumo').value, itens: itens,
+        totalGeral: document.getElementById('totalGeral').innerText, fornecedor: document.getElementById('fornecedor').value,
+        orcado: document.getElementById('orcado').value, valorOrcado: document.getElementById('vOrcado').value,
+        formaPagamento: document.getElementById('fPagamento').value, usuarioEMS: document.getElementById('uEMS').value
+      };
+
+      google.script.run.withSuccessHandler(() => { 
+        document.getElementById('formBox').classList.add('hidden');
+        document.getElementById('successBox').classList.remove('hidden');
+      }).withFailureHandler(err => { 
+        alert("Erro no servidor: " + err); btn.disabled = false; btn.innerText = "SUBMETER"; 
+      }).registrarNovaAI(dados);
+    }
+
+    function carregarAIs() {
+      const tbody = document.getElementById('listaAIs');
+      tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>Consultando base de dados...</td></tr>";
+      google.script.run.withSuccessHandler(ais => {
+        tbody.innerHTML = "";
+        if(ais.length === 0) tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>Sem pendências.</td></tr>";
+        ais.forEach(ai => {
+          let acaoHtml = ai.status === "FINALIZADA" ? `<span style="color:var(--primary); font-weight:bold;">✅ CONCLUÍDA</span>` 
+                       : (ai.nivel === "FINALIZACAO" ? `<button onclick="abrirModal('${ai.id}')" style="background:var(--primary); padding:5px; border:none; color:white; cursor:pointer;">FINALIZAR</button>` 
+                       : `<span style="color:#999;">EM FLUXO</span>`);
+          tbody.innerHTML += `<tr><td>${ai.data}</td><td>${ai.solicitante}</td><td>${ai.projeto}</td><td>R$ ${ai.valor}</td><td><b>${ai.status}</b></td><td>${acaoHtml}</td></tr>`;
+        });
+      }).buscarDadosControladoria();
+    }
+
+    function abrirModal(id) { document.getElementById('fIdAI').value = id; document.getElementById('modalFinalizar').style.display = 'flex'; }
+    function fecharModal() { document.getElementById('modalFinalizar').style.display = 'none'; }
+    function confirmarFinalizacao() {
+      const btn = event.target; btn.innerText = "GERANDO..."; btn.disabled = true;
+      const d = { idAI: document.getElementById('fIdAI').value, numeroAI: document.getElementById('fNumAI').value, ano: document.getElementById('fAno').value, idProjeto: document.getElementById('fProjID').value };
+      if(!d.numeroAI || !d.idProjeto) { alert("Preencha todos os campos."); btn.disabled=false; btn.innerText="GERAR PDF"; return; }
+      google.script.run.withSuccessHandler(res => { alert(res); fecharModal(); carregarAIs(); btn.innerText="GERAR PDF E FINALIZAR"; btn.disabled=false; }).finalizarProcessoAI(d);
+    }
+    function logout() { sessionStorage.clear(); location.reload(); }
+  </script>
+</body>
+</html>
